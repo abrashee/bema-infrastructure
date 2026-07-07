@@ -1,0 +1,313 @@
+services:
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # GATEWAY
+  # ─────────────────────────────────────────────────────────────────────────────
+  gateway-service:
+    build:
+      context: ../../bema-api-gateway
+      dockerfile: Dockerfile
+    container_name: bema-gateway
+    ports:
+      - "8080:8080"
+    networks:
+      - bema-net
+    depends_on:
+      - user-service
+      - policy-service
+      - claim-service
+      - identity-service
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      JWT_SECRET: ${JWT_SECRET}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # REDIS
+  # ─────────────────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: bema-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - bema-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # USER SERVICE
+  # ─────────────────────────────────────────────────────────────────────────────
+  user-service:
+    build:
+      context: ../../bema-user-service
+      dockerfile: Dockerfile
+    container_name: bema-user-service
+    depends_on:
+      postgres-user:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-user:5432/${USER_DB}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-3600000}
+      IDENTITY_SERVICE_URL: http://identity-service:8084
+    ports:
+      - "8081:8081"
+    networks:
+      - bema-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # POLICY SERVICE
+  # ─────────────────────────────────────────────────────────────────────────────
+  policy-service:
+    build:
+      context: ../../bema-policy-service
+      dockerfile: Dockerfile
+    container_name: bema-policy-service
+    depends_on:
+      postgres-policy:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-policy:5432/${POLICY_DB}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-3600000}
+      IDENTITY_SERVICE_URL: http://identity-service:8084
+    ports:
+      - "8082:8082"
+    networks:
+      - bema-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # CLAIM SERVICE
+  # ─────────────────────────────────────────────────────────────────────────────
+  # ─────────────────────────────────────────────────────────────────────────────
+  # CLAIM SERVICE
+  # ─────────────────────────────────────────────────────────────────────────────
+  claim-service:
+    build:
+      context: ../../bema-claim-service
+      dockerfile: Dockerfile
+    container_name: bema-claim-service
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres-claim:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-claim:5432/${CLAIM_DB}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      JWT_SECRET: ${JWT_SECRET}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      PORT: 8083
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres-claim:5432/${CLAIM_DB}
+    ports:
+      - "8083:8083"
+    networks:
+      - bema-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/api/claims/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # CLAIM MIGRATIONS (SEPARATE SERVICE)
+  # ─────────────────────────────────────────────────────────────────────────────
+  claim-migrations:
+    build:
+      context: ../../bema-claim-service
+      dockerfile: Dockerfile
+    container_name: bema-claim-migrations
+    command: npx prisma migrate deploy
+    restart: "no"
+    depends_on:
+      postgres-claim:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres-claim:5432/${CLAIM_DB}
+    networks:
+      - bema-net
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # IDENTITY SERVICE (FIXED)
+  # ─────────────────────────────────────────────────────────────────────────────
+  identity-service:
+    build:
+      context: ../../identity-service
+      dockerfile: Dockerfile
+    container_name: bema-identity-service
+
+    ports:
+      - "8084:8084"
+
+    networks:
+      - bema-net
+
+    depends_on:
+      postgres-identity:
+        condition: service_healthy
+
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+
+      # DB (FIXED: now consistent + injectable)
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-identity:5432/${IDENTITY_DB}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+
+      # JWT
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-3600000}
+
+      # SERVICE COMMUNICATION
+      USER_SERVICE_URL: http://user-service:8081
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # FRONTEND
+  # ─────────────────────────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ../../bema-frontend
+      dockerfile: Dockerfile
+      args:
+        API_BASE_URL: ${FRONTEND_API_BASE_URL}
+    container_name: bema-frontend
+    depends_on:
+      - gateway-service
+    ports:
+      - "4200:80"
+    networks:
+      - bema-net
+
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # DATABASES
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  postgres-user:
+    image: postgres:17-alpine
+    container_name: bema-user-db
+    environment:
+      POSTGRES_DB: ${USER_DB}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - user_db_data:/var/lib/postgresql/data
+    networks:
+      - bema-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${USER_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-policy:
+    image: postgres:17-alpine
+    container_name: bema-policy-db
+    environment:
+      POSTGRES_DB: ${POLICY_DB}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - policy_db_data:/var/lib/postgresql/data
+    networks:
+      - bema-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${POLICY_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-claim:
+    image: postgres:17-alpine
+    container_name: bema-claim-db
+    environment:
+      POSTGRES_DB: ${CLAIM_DB}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - claim_db_data:/var/lib/postgresql/data
+    networks:
+      - bema-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${CLAIM_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-identity:
+    image: postgres:17-alpine
+    container_name: bema-identity-db
+    environment:
+      POSTGRES_DB: ${IDENTITY_DB}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - identity_db_data:/var/lib/postgresql/data
+    networks:
+      - bema-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${IDENTITY_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# ─────────────────────────────────────────────────────────────────────────────
+# VOLUMES
+# ─────────────────────────────────────────────────────────────────────────────
+volumes:
+  user_db_data:
+  policy_db_data:
+  claim_db_data:
+  identity_db_data:
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# NETWORK
+# ─────────────────────────────────────────────────────────────────────────────
+networks:
+  bema-net:
+    driver: bridge

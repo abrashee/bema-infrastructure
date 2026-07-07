@@ -1,0 +1,54 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'bema-cluster'
+    environment: dev
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+scrape_configs:
+  # User Service
+  - job_name: 'user-service'
+    static_configs:
+      - targets: ['user-service:8081']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
+  # Policy Service
+  - job_name: 'policy-service'
+    static_configs:
+      - targets: ['policy-service:8082']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
+  # Claim Service
+  - job_name: 'claim-service'
+    static_configs:
+      - targets: ['claim-service:8083']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    scrape_interval: 15s
+
+  # Tempo traces
+  # - job_name: 'tempo'
+  #   static_configs:
+  #     - targets: ['tempo:3200']
+  #   scrape_interval: 15s
+
+  # Grafana monitoring
+  # - job_name: 'grafana'
+  #   static_configs:
+  #     - targets: ['grafana:3000']
+  #   scrape_interval: 15s
