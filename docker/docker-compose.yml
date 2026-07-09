@@ -229,6 +229,7 @@ services:
 
   postgres-user:
     image: postgres:17-alpine
+    command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements"]
     container_name: bema-user-db
     environment:
       POSTGRES_DB: ${USER_DB}
@@ -246,6 +247,7 @@ services:
 
   postgres-policy:
     image: postgres:17-alpine
+    command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements"]
     container_name: bema-policy-db
     environment:
       POSTGRES_DB: ${POLICY_DB}
@@ -263,6 +265,7 @@ services:
 
   postgres-claim:
     image: postgres:17-alpine
+    command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements"]
     container_name: bema-claim-db
     environment:
       POSTGRES_DB: ${CLAIM_DB}
@@ -280,6 +283,7 @@ services:
 
   postgres-identity:
     image: postgres:17-alpine
+    command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements"]
     container_name: bema-identity-db
     environment:
       POSTGRES_DB: ${IDENTITY_DB}
