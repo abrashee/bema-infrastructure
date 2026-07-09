@@ -310,4 +310,5 @@ volumes:
 # ─────────────────────────────────────────────────────────────────────────────
 networks:
   bema-net:
+    name: bema-net
     driver: bridge

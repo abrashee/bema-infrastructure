@@ -1,6 +1,6 @@
 server:
   http_listen_port: 3200
-  grpc_listen_port: 4317
+  grpc_listen_port: 9095
 
 distributor:
   receivers:
@@ -23,9 +23,4 @@ storage:
 
 querier:
   frontend_worker:
-    frontend_address: localhost:3200
-
-limits:
-  metrics:
-    max_samples: 10000000
-    max_series: 400000
+    frontend_address: localhost:9095
