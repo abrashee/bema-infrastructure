@@ -22,6 +22,22 @@ services:
       retries: 3
 
   # ─────────────────────────────────────────────────────────────────────────────
+  # OPENTELEMETRY COLLECTOR
+  # ─────────────────────────────────────────────────────────────────────────────
+  otel-collector:
+    image: otel/opentelemetry-collector:0.156.0
+    container_name: bema-otel-collector
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes:
+      - ../observability/otel-collector.yaml:/etc/otelcol/config.yaml:ro
+    networks:
+      - bema-net
+    depends_on:
+      tempo:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────────────────────────────────────────
   # PROMETHEUS (Metrics)
   # ─────────────────────────────────────────────────────────────────────────────
   prometheus:
