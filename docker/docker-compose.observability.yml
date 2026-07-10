@@ -38,6 +38,69 @@ services:
     restart: unless-stopped
 
   # ─────────────────────────────────────────────────────────────────────────────
+  # POSTGRES EXPORTERS
+  # ─────────────────────────────────────────────────────────────────────────────
+  postgres-exporter-user:
+    image: prometheuscommunity/postgres-exporter:latest
+    command: ["--config.file=/etc/postgres-exporter.yml"]
+    container_name: bema-postgres-exporter-user
+    volumes:
+      - ../observability/postgres-exporter.yml:/etc/postgres-exporter.yml:ro
+    environment:
+      DATA_SOURCE_NAME: "postgresql://${DB_USER}:${DB_PASSWORD}@postgres-user:5432/${USER_DB}?sslmode=disable"
+    networks:
+      - bema-net
+    depends_on:
+      postgres-user:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres-exporter-policy:
+    image: prometheuscommunity/postgres-exporter:latest
+    command: ["--config.file=/etc/postgres-exporter.yml"]
+    container_name: bema-postgres-exporter-policy
+    volumes:
+      - ../observability/postgres-exporter.yml:/etc/postgres-exporter.yml:ro
+    environment:
+      DATA_SOURCE_NAME: "postgresql://${DB_USER}:${DB_PASSWORD}@postgres-policy:5432/${POLICY_DB}?sslmode=disable"
+    networks:
+      - bema-net
+    depends_on:
+      postgres-policy:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres-exporter-identity:
+    image: prometheuscommunity/postgres-exporter:latest
+    command: ["--config.file=/etc/postgres-exporter.yml"]
+    container_name: bema-postgres-exporter-identity
+    volumes:
+      - ../observability/postgres-exporter.yml:/etc/postgres-exporter.yml:ro
+    environment:
+      DATA_SOURCE_NAME: "postgresql://${DB_USER}:${DB_PASSWORD}@postgres-identity:5432/${IDENTITY_DB}?sslmode=disable"
+    networks:
+      - bema-net
+    depends_on:
+      postgres-identity:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres-exporter-claim:
+    image: prometheuscommunity/postgres-exporter:latest
+    command: ["--config.file=/etc/postgres-exporter.yml"]
+    container_name: bema-postgres-exporter-claim
+    volumes:
+      - ../observability/postgres-exporter.yml:/etc/postgres-exporter.yml:ro
+    environment:
+      DATA_SOURCE_NAME: "postgresql://${DB_USER}:${DB_PASSWORD}@postgres-claim:5432/${CLAIM_DB}?sslmode=disable"
+    networks:
+      - bema-net
+    depends_on:
+      postgres-claim:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────────────────────────────────────────
   # PROMETHEUS (Metrics)
   # ─────────────────────────────────────────────────────────────────────────────
   prometheus:
