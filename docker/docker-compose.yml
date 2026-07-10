@@ -20,6 +20,7 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
       JWT_SECRET: ${JWT_SECRET}
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318/v1/traces
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 10s
@@ -65,6 +66,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-3600000}
       IDENTITY_SERVICE_URL: http://identity-service:8084
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318/v1/traces
     ports:
       - "8081:8081"
     networks:
@@ -96,6 +98,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-3600000}
       IDENTITY_SERVICE_URL: http://identity-service:8084
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318/v1/traces
     ports:
       - "8082:8082"
     networks:
@@ -198,6 +201,7 @@ services:
 
       # SERVICE COMMUNICATION
       USER_SERVICE_URL: http://user-service:8081
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318/v1/traces
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health"]
