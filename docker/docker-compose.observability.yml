@@ -101,6 +101,21 @@ services:
     restart: unless-stopped
 
   # ─────────────────────────────────────────────────────────────────────────────
+  # REDIS EXPORTER
+  # ─────────────────────────────────────────────────────────────────────────────
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: bema-redis-exporter
+    environment:
+      REDIS_ADDR: redis://redis:6379
+    networks:
+      - bema-net
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────────────────────────────────────────
   # PROMETHEUS (Metrics)
   # ─────────────────────────────────────────────────────────────────────────────
   prometheus:
