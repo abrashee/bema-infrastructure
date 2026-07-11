@@ -24,6 +24,7 @@ services:
       REDIS_PORT: 6379
       LOGIN_RATE_LIMIT_MAX_REQUESTS: ${LOGIN_RATE_LIMIT_MAX_REQUESTS:-10}
       LOGIN_RATE_LIMIT_WINDOW_MS: ${LOGIN_RATE_LIMIT_WINDOW_MS:-60000}
+      CORS_ALLOWED_ORIGIN: ${CORS_ALLOWED_ORIGIN:-http://localhost:4200}
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318/v1/traces
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
@@ -152,6 +153,7 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       PORT: 8083
+      WEBSOCKET_ORIGIN: ${WEBSOCKET_ORIGIN:-http://localhost:4200}
       DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres-claim:5432/${CLAIM_DB}
       OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://otel-collector:4318/v1/traces
     ports:
