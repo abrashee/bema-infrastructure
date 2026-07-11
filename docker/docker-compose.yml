@@ -79,8 +79,8 @@ services:
       BRUTE_FORCE_FAILURE_WINDOW_SECONDS: ${BRUTE_FORCE_FAILURE_WINDOW_SECONDS:-900}
       BRUTE_FORCE_LOCK_SECONDS: ${BRUTE_FORCE_LOCK_SECONDS:-900}
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318/v1/traces
-    ports:
-      - "8081:8081"
+    expose:
+      - "8081"
     networks:
       - bema-net
     healthcheck:
@@ -115,8 +115,8 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318/v1/traces
-    ports:
-      - "8082:8082"
+    expose:
+      - "8082"
     networks:
       - bema-net
     healthcheck:
@@ -156,8 +156,8 @@ services:
       WEBSOCKET_ORIGIN: ${WEBSOCKET_ORIGIN:-http://localhost:4200}
       DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres-claim:5432/${CLAIM_DB}
       OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://otel-collector:4318/v1/traces
-    ports:
-      - "8083:8083"
+    expose:
+      - "8083"
     networks:
       - bema-net
     healthcheck:
@@ -195,8 +195,8 @@ services:
       dockerfile: Dockerfile
     container_name: bema-identity-service
 
-    ports:
-      - "8084:8084"
+    expose:
+      - "8084"
 
     networks:
       - bema-net
