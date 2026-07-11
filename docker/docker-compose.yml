@@ -58,6 +58,8 @@ services:
     depends_on:
       postgres-user:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-user:5432/${USER_DB}
       SPRING_DATASOURCE_USERNAME: ${DB_USER}
@@ -66,6 +68,8 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-3600000}
       IDENTITY_SERVICE_URL: http://identity-service:8084
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318/v1/traces
     ports:
       - "8081:8081"
@@ -90,6 +94,8 @@ services:
     depends_on:
       postgres-policy:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-policy:5432/${POLICY_DB}
       SPRING_DATASOURCE_USERNAME: ${DB_USER}
@@ -98,6 +104,8 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-3600000}
       IDENTITY_SERVICE_URL: http://identity-service:8084
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318/v1/traces
     ports:
       - "8082:8082"
@@ -187,6 +195,8 @@ services:
     depends_on:
       postgres-identity:
         condition: service_healthy
+      redis:
+        condition: service_healthy
 
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
@@ -199,6 +209,10 @@ services:
       # JWT
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-3600000}
+
+      # REDIS TOKEN REVOCATION
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
 
       # SERVICE COMMUNICATION
       USER_SERVICE_URL: http://user-service:8081
