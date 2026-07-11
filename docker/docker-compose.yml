@@ -20,6 +20,10 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
       JWT_SECRET: ${JWT_SECRET}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      LOGIN_RATE_LIMIT_MAX_REQUESTS: ${LOGIN_RATE_LIMIT_MAX_REQUESTS:-10}
+      LOGIN_RATE_LIMIT_WINDOW_MS: ${LOGIN_RATE_LIMIT_WINDOW_MS:-60000}
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318/v1/traces
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
