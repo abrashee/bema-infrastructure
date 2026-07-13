@@ -250,7 +250,7 @@ services:
     depends_on:
       - gateway-service
     ports:
-      - "4200:80"
+      - "4200:8080"
     networks:
       - bema-net
 
