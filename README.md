@@ -85,7 +85,7 @@ CLAIM_DB=bema_claim_db
 
 # Application
 SPRING_PROFILES_ACTIVE=dev
-JWT_SECRET=min_32_character_secret
+JWT_SECRET=${JWT_SECRET}
 
 # Frontend
 FRONTEND_API_BASE_URL=http://localhost:8081
