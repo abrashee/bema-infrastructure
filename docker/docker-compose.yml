@@ -183,6 +183,7 @@ services:
     build:
       context: ../../bema-claim-service
       dockerfile: Dockerfile
+      target: migrations
     container_name: bema-claim-migrations
     command: npx prisma migrate deploy
     restart: "no"
