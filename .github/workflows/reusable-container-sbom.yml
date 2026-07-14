@@ -1,0 +1,113 @@
+name: Reusable Container SBOM
+
+on:
+  workflow_call:
+    inputs:
+      repository:
+        description: Public repository containing the Dockerfile
+        required: true
+        type: string
+      ref:
+        description: Branch, tag, or commit to build
+        required: true
+        type: string
+      image-name:
+        description: Local Docker image name
+        required: true
+        type: string
+      artifact-name:
+        description: Uploaded SBOM artifact name
+        required: true
+        type: string
+      context:
+        description: Docker build context relative to the repository root
+        required: false
+        default: .
+        type: string
+      dockerfile:
+        description: Dockerfile path relative to the repository root
+        required: false
+        default: Dockerfile
+        type: string
+      target:
+        description: Optional Docker build target
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  generate-sbom:
+    name: Generate ${{ inputs.artifact-name }} SBOM
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout source repository
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ inputs.repository }}
+          ref: ${{ inputs.ref }}
+          path: source
+          persist-credentials: false
+
+      - name: Build container image
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          target_args=()
+
+          if [[ -n "${{ inputs.target }}" ]]; then
+            target_args+=(--target "${{ inputs.target }}")
+          fi
+
+          docker build \
+            --file "source/${{ inputs.dockerfile }}" \
+            --tag "${{ inputs.image-name }}:sbom" \
+            "${target_args[@]}" \
+            "source/${{ inputs.context }}"
+
+      - name: Install Syft
+        id: syft
+        uses: anchore/sbom-action/download-syft@v0.24.0
+
+      - name: Generate CycloneDX SBOM
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p sbom
+
+          "${{ steps.syft.outputs.cmd }}" \
+            "${{ inputs.image-name }}:sbom" \
+            --output "cyclonedx-json=sbom/${{ inputs.artifact-name }}.cdx.json"
+
+      - name: Validate CycloneDX SBOM
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          jq -e '
+            .bomFormat == "CycloneDX"
+            and (.specVersion | type == "string")
+            and (.specVersion | length > 0)
+            and (.components | type == "array")
+            and (.components | length > 0)
+          ' "sbom/${{ inputs.artifact-name }}.cdx.json"
+
+          jq '{
+            bomFormat,
+            specVersion,
+            componentCount: (.components | length)
+          }' "sbom/${{ inputs.artifact-name }}.cdx.json"
+
+      - name: Upload CycloneDX SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: sbom/${{ inputs.artifact-name }}.cdx.json
+          if-no-files-found: error
+          retention-days: 30
