@@ -204,4 +204,6 @@ test-results/
 # =========================================================
 
 !.gitkeep
-```
+
+# Generated database backups
+backups/
