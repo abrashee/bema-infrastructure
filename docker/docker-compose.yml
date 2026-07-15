@@ -77,9 +77,6 @@ services:
       IDENTITY_SERVICE_URL: http://identity-service:8084
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      BRUTE_FORCE_MAX_FAILURES: ${BRUTE_FORCE_MAX_FAILURES:-5}
-      BRUTE_FORCE_FAILURE_WINDOW_SECONDS: ${BRUTE_FORCE_FAILURE_WINDOW_SECONDS:-900}
-      BRUTE_FORCE_LOCK_SECONDS: ${BRUTE_FORCE_LOCK_SECONDS:-900}
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318/v1/traces
     expose:
       - "8081"
@@ -132,9 +129,6 @@ services:
   # ─────────────────────────────────────────────────────────────────────────────
   # CLAIM SERVICE
   # ─────────────────────────────────────────────────────────────────────────────
-  # ─────────────────────────────────────────────────────────────────────────────
-  # CLAIM SERVICE
-  # ─────────────────────────────────────────────────────────────────────────────
   claim-service:
     build:
       context: ../../bema-claim-service
@@ -146,10 +140,6 @@ services:
       postgres-claim:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-claim:5432/${CLAIM_DB}
-      SPRING_DATASOURCE_USERNAME: ${DB_USER}
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
       JWT_SECRET: ${JWT_SECRET}
       LOG_LEVEL: ${CLAIM_LOG_LEVEL:-info}
       REDIS_HOST: redis
@@ -232,6 +222,12 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
 
+      # OPTIONAL ADMINISTRATOR BOOTSTRAP
+      BOOTSTRAP_ADMIN_ENABLED: ${BOOTSTRAP_ADMIN_ENABLED:-false}
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-}
+      BOOTSTRAP_ADMIN_NAME: ${BOOTSTRAP_ADMIN_NAME:-}
+
       # SERVICE COMMUNICATION
       USER_SERVICE_URL: http://user-service:8081
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318/v1/traces
@@ -251,8 +247,6 @@ services:
     build:
       context: ../../bema-frontend
       dockerfile: Dockerfile
-      args:
-        API_BASE_URL: ${FRONTEND_API_BASE_URL}
     container_name: bema-frontend
     depends_on:
       - gateway-service

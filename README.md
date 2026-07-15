@@ -82,13 +82,11 @@ DB_PASSWORD=secure_password
 USER_DB=bema_user_db
 POLICY_DB=bema_policy_db
 CLAIM_DB=bema_claim_db
+IDENTITY_DB=bema_identity_db
 
 # Application
 SPRING_PROFILES_ACTIVE=dev
-JWT_SECRET=${JWT_SECRET}
-
-# Frontend
-FRONTEND_API_BASE_URL=http://localhost:8081
+JWT_SECRET=replace-with-a-minimum-32-character-secret
 
 # Grafana
 GRAFANA_USER=admin
