@@ -3,7 +3,7 @@ services:
   # TEMPO (Tracing)
   # ─────────────────────────────────────────────────────────────────────────────
   tempo:
-    image: grafana/tempo:2.8.2
+    image: grafana/tempo:2.10.7@sha256:032b3acb51ed02c4b801473d54bb63e9e9f13738d215126d9843c30283794f4b
     container_name: bema-tempo
     command: ["-config.file=/etc/tempo.yaml"]
     volumes:
@@ -15,17 +15,12 @@ services:
       - "4318:4318"  # OTLP HTTP
     networks:
       - bema-net
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3200/status"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
 
   # ─────────────────────────────────────────────────────────────────────────────
   # OPENTELEMETRY COLLECTOR
   # ─────────────────────────────────────────────────────────────────────────────
   otel-collector:
-    image: otel/opentelemetry-collector:0.156.0
+    image: otel/opentelemetry-collector:0.156.0@sha256:0beba82d63792511591522a8d582904b9a8ae81710357bfcab731607b8b0ffe2
     container_name: bema-otel-collector
     command: ["--config=/etc/otelcol/config.yaml"]
     volumes:
@@ -34,14 +29,14 @@ services:
       - bema-net
     depends_on:
       tempo:
-        condition: service_healthy
+        condition: service_started
     restart: unless-stopped
 
   # ─────────────────────────────────────────────────────────────────────────────
   # POSTGRES EXPORTERS
   # ─────────────────────────────────────────────────────────────────────────────
   postgres-exporter-user:
-    image: prometheuscommunity/postgres-exporter:latest
+    image: prometheuscommunity/postgres-exporter:v0.20.1@sha256:ac5ec343104fae0e2d84a27bb8d69b38430a11910c5382cad85d478d2bab713e
     command: ["--config.file=/etc/postgres-exporter.yml"]
     container_name: bema-postgres-exporter-user
     volumes:
@@ -56,7 +51,7 @@ services:
     restart: unless-stopped
 
   postgres-exporter-policy:
-    image: prometheuscommunity/postgres-exporter:latest
+    image: prometheuscommunity/postgres-exporter:v0.20.1@sha256:ac5ec343104fae0e2d84a27bb8d69b38430a11910c5382cad85d478d2bab713e
     command: ["--config.file=/etc/postgres-exporter.yml"]
     container_name: bema-postgres-exporter-policy
     volumes:
@@ -71,7 +66,7 @@ services:
     restart: unless-stopped
 
   postgres-exporter-identity:
-    image: prometheuscommunity/postgres-exporter:latest
+    image: prometheuscommunity/postgres-exporter:v0.20.1@sha256:ac5ec343104fae0e2d84a27bb8d69b38430a11910c5382cad85d478d2bab713e
     command: ["--config.file=/etc/postgres-exporter.yml"]
     container_name: bema-postgres-exporter-identity
     volumes:
@@ -86,7 +81,7 @@ services:
     restart: unless-stopped
 
   postgres-exporter-claim:
-    image: prometheuscommunity/postgres-exporter:latest
+    image: prometheuscommunity/postgres-exporter:v0.20.1@sha256:ac5ec343104fae0e2d84a27bb8d69b38430a11910c5382cad85d478d2bab713e
     command: ["--config.file=/etc/postgres-exporter.yml"]
     container_name: bema-postgres-exporter-claim
     volumes:
@@ -104,7 +99,7 @@ services:
   # REDIS EXPORTER
   # ─────────────────────────────────────────────────────────────────────────────
   redis-exporter:
-    image: oliver006/redis_exporter:latest
+    image: oliver006/redis_exporter:v1.86.0@sha256:2e9795be900db073e9475fdb9c5124db309b07a3e4e75a1770705cb03be1a1c8
     container_name: bema-redis-exporter
     environment:
       REDIS_ADDR: redis://redis:6379
@@ -119,7 +114,7 @@ services:
   # PROMETHEUS (Metrics)
   # ─────────────────────────────────────────────────────────────────────────────
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v3.13.1@sha256:3c42b892cf723fa54d2f262c37a0e1f80aa8c8ddb1da7b9b0df9455a35a7f893
     container_name: bema-prometheus
     volumes:
       - ../observability/prometheus.yaml:/etc/prometheus/prometheus.yaml
@@ -145,7 +140,10 @@ services:
   # GRAFANA (Visualization)
   # ─────────────────────────────────────────────────────────────────────────────
   grafana:
-    image: grafana/grafana:latest
+    build:
+      context: ./grafana
+      dockerfile: Dockerfile
+    image: bema-grafana:13.1.0-hardened
     container_name: bema-grafana
     ports:
       - "3001:3000"
