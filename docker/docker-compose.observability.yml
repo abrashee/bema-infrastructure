@@ -5,6 +5,7 @@ services:
   tempo:
     image: grafana/tempo:2.10.7@sha256:032b3acb51ed02c4b801473d54bb63e9e9f13738d215126d9843c30283794f4b
     container_name: bema-tempo
+    restart: unless-stopped
     command: ["-config.file=/etc/tempo.yaml"]
     volumes:
       - ../observability/tempo.yaml:/etc/tempo.yaml
@@ -140,6 +141,7 @@ services:
   prometheus:
     image: prom/prometheus:v3.13.1@sha256:3c42b892cf723fa54d2f262c37a0e1f80aa8c8ddb1da7b9b0df9455a35a7f893
     container_name: bema-prometheus
+    restart: unless-stopped
     volumes:
       - ../observability/prometheus.yaml:/etc/prometheus/prometheus.yaml
       - prometheus_data:/prometheus
@@ -169,6 +171,7 @@ services:
       dockerfile: Dockerfile
     image: bema-grafana:13.1.0-hardened
     container_name: bema-grafana
+    restart: unless-stopped
     ports:
       - "3001:3000"
     environment:

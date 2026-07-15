@@ -8,6 +8,7 @@ services:
       context: ../../bema-api-gateway
       dockerfile: Dockerfile
     container_name: bema-gateway
+    restart: unless-stopped
     ports:
       - "8080:8080"
     networks:
@@ -43,6 +44,7 @@ services:
     image: valkey/valkey:8.1.8-alpine@sha256:cfe71288f087704b06be45e270afa7a2abbf820093d6b11a23762081f5ff321d
     command: ["redis-server", "--maxmemory", "128mb", "--maxmemory-policy", "allkeys-lru"]
     container_name: bema-redis
+    restart: unless-stopped
     ports:
       - "6379:6379"
     networks:
@@ -62,6 +64,7 @@ services:
       context: ../../bema-user-service
       dockerfile: Dockerfile
     container_name: bema-user-service
+    restart: unless-stopped
     depends_on:
       postgres-user:
         condition: service_healthy
@@ -98,6 +101,7 @@ services:
       context: ../../bema-policy-service
       dockerfile: Dockerfile
     container_name: bema-policy-service
+    restart: unless-stopped
     depends_on:
       postgres-policy:
         condition: service_healthy
@@ -134,6 +138,7 @@ services:
       context: ../../bema-claim-service
       dockerfile: Dockerfile
     container_name: bema-claim-service
+    restart: unless-stopped
     depends_on:
       redis:
         condition: service_healthy
@@ -193,6 +198,7 @@ services:
       context: ../../identity-service
       dockerfile: Dockerfile
     container_name: bema-identity-service
+    restart: unless-stopped
 
     expose:
       - "8084"
@@ -248,6 +254,7 @@ services:
       context: ../../bema-frontend
       dockerfile: Dockerfile
     container_name: bema-frontend
+    restart: unless-stopped
     depends_on:
       - gateway-service
     ports:
@@ -273,6 +280,7 @@ services:
     image: bema-postgres:17.10-alpine-patched
     command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements", "-c", "log_min_duration_statement=500"]
     container_name: bema-user-db
+    restart: unless-stopped
     environment:
       POSTGRES_DB: ${USER_DB}
       POSTGRES_USER: ${DB_USER}
@@ -294,6 +302,7 @@ services:
     image: bema-postgres:17.10-alpine-patched
     command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements", "-c", "log_min_duration_statement=500"]
     container_name: bema-policy-db
+    restart: unless-stopped
     environment:
       POSTGRES_DB: ${POLICY_DB}
       POSTGRES_USER: ${DB_USER}
@@ -315,6 +324,7 @@ services:
     image: bema-postgres:17.10-alpine-patched
     command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements", "-c", "log_min_duration_statement=500"]
     container_name: bema-claim-db
+    restart: unless-stopped
     environment:
       POSTGRES_DB: ${CLAIM_DB}
       POSTGRES_USER: ${DB_USER}
@@ -336,6 +346,7 @@ services:
     image: bema-postgres:17.10-alpine-patched
     command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements", "-c", "log_min_duration_statement=500"]
     container_name: bema-identity-db
+    restart: unless-stopped
     environment:
       POSTGRES_DB: ${IDENTITY_DB}
       POSTGRES_USER: ${DB_USER}
