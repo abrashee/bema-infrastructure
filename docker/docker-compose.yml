@@ -254,6 +254,12 @@ services:
       - "4200:8080"
     networks:
       - bema-net
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8080/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
 
   # ─────────────────────────────────────────────────────────────────────────────
