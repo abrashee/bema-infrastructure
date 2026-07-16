@@ -45,8 +45,8 @@ services:
     command: ["redis-server", "--maxmemory", "128mb", "--maxmemory-policy", "allkeys-lru"]
     container_name: bema-redis
     restart: unless-stopped
-    ports:
-      - "6379:6379"
+    expose:
+      - "6379"
     networks:
       - bema-net
     healthcheck:
