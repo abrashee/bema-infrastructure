@@ -1,9 +1,16 @@
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
 
   # ─────────────────────────────────────────────────────────────────────────────
   # GATEWAY
   # ─────────────────────────────────────────────────────────────────────────────
   gateway-service:
+    logging: *default-logging
     build:
       context: ../../bema-api-gateway
       dockerfile: Dockerfile
@@ -41,6 +48,7 @@ services:
   # REDIS
   # ─────────────────────────────────────────────────────────────────────────────
   redis:
+    logging: *default-logging
     image: valkey/valkey:8.1.8-alpine@sha256:cfe71288f087704b06be45e270afa7a2abbf820093d6b11a23762081f5ff321d
     command: ["redis-server", "--maxmemory", "128mb", "--maxmemory-policy", "allkeys-lru"]
     container_name: bema-redis
@@ -60,6 +68,7 @@ services:
   # USER SERVICE
   # ─────────────────────────────────────────────────────────────────────────────
   user-service:
+    logging: *default-logging
     build:
       context: ../../bema-user-service
       dockerfile: Dockerfile
@@ -97,6 +106,7 @@ services:
   # POLICY SERVICE
   # ─────────────────────────────────────────────────────────────────────────────
   policy-service:
+    logging: *default-logging
     build:
       context: ../../bema-policy-service
       dockerfile: Dockerfile
@@ -134,6 +144,7 @@ services:
   # CLAIM SERVICE
   # ─────────────────────────────────────────────────────────────────────────────
   claim-service:
+    logging: *default-logging
     build:
       context: ../../bema-claim-service
       dockerfile: Dockerfile
@@ -175,6 +186,7 @@ services:
   # CLAIM MIGRATIONS (SEPARATE SERVICE)
   # ─────────────────────────────────────────────────────────────────────────────
   claim-migrations:
+    logging: *default-logging
     build:
       context: ../../bema-claim-service
       dockerfile: Dockerfile
@@ -194,6 +206,7 @@ services:
   # IDENTITY SERVICE (FIXED)
   # ─────────────────────────────────────────────────────────────────────────────
   identity-service:
+    logging: *default-logging
     build:
       context: ../../identity-service
       dockerfile: Dockerfile
@@ -250,6 +263,7 @@ services:
   # FRONTEND
   # ─────────────────────────────────────────────────────────────────────────────
   frontend:
+    logging: *default-logging
     build:
       context: ../../bema-frontend
       dockerfile: Dockerfile
@@ -274,6 +288,7 @@ services:
   # ─────────────────────────────────────────────────────────────────────────────
 
   postgres-user:
+    logging: *default-logging
     build:
       context: ./postgres
       dockerfile: Dockerfile
@@ -296,6 +311,7 @@ services:
       retries: 5
 
   postgres-policy:
+    logging: *default-logging
     build:
       context: ./postgres
       dockerfile: Dockerfile
@@ -318,6 +334,7 @@ services:
       retries: 5
 
   postgres-claim:
+    logging: *default-logging
     build:
       context: ./postgres
       dockerfile: Dockerfile
@@ -340,6 +357,7 @@ services:
       retries: 5
 
   postgres-identity:
+    logging: *default-logging
     build:
       context: ./postgres
       dockerfile: Dockerfile
