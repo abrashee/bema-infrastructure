@@ -16,17 +16,20 @@ build_and_tag() {
   local commit
   commit="$(git -C "${ROOT_DIR}/${repo_dir}" rev-parse --short=12 HEAD)"
 
-  local build_args=()
   if [[ -n "$target" ]]; then
-    build_args+=(--target "$target")
+    docker build \
+      --file "${ROOT_DIR}/${repo_dir}/${dockerfile}" \
+      --target "$target" \
+      --tag "${ECR_REGISTRY}/${ecr_repo}:${commit}" \
+      --tag "${ECR_REGISTRY}/${ecr_repo}:latest" \
+      "${ROOT_DIR}/${repo_dir}"
+  else
+    docker build \
+      --file "${ROOT_DIR}/${repo_dir}/${dockerfile}" \
+      --tag "${ECR_REGISTRY}/${ecr_repo}:${commit}" \
+      --tag "${ECR_REGISTRY}/${ecr_repo}:latest" \
+      "${ROOT_DIR}/${repo_dir}"
   fi
-
-  docker build \
-    --file "${ROOT_DIR}/${repo_dir}/${dockerfile}" \
-    --tag "${ECR_REGISTRY}/${ecr_repo}:${commit}" \
-    --tag "${ECR_REGISTRY}/${ecr_repo}:latest" \
-    "${build_args[@]}" \
-    "${ROOT_DIR}/${repo_dir}"
 
   printf '%s\t%s\n' "$ecr_repo" "$commit"
 }
