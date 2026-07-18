@@ -10,10 +10,8 @@ services:
   # GATEWAY
   # ─────────────────────────────────────────────────────────────────────────────
   gateway-service:
+    image: fra.ocir.io/frurj87kcrxi/bema-api-gateway:latest
     logging: *default-logging
-    build:
-      context: ../../bema-api-gateway
-      dockerfile: Dockerfile
     container_name: bema-gateway
     restart: unless-stopped
     ports:
@@ -35,6 +33,7 @@ services:
       GATEWAY_RATE_LIMIT_MAX_REQUESTS: ${GATEWAY_RATE_LIMIT_MAX_REQUESTS:-300}
       GATEWAY_RATE_LIMIT_WINDOW_MS: ${GATEWAY_RATE_LIMIT_WINDOW_MS:-60000}
       CORS_ALLOWED_ORIGIN: ${CORS_ALLOWED_ORIGIN}
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318/v1/traces
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 10s
@@ -67,10 +66,8 @@ services:
   # USER SERVICE
   # ─────────────────────────────────────────────────────────────────────────────
   user-service:
+    image: fra.ocir.io/frurj87kcrxi/bema-user-service:latest
     logging: *default-logging
-    build:
-      context: ../../bema-user-service
-      dockerfile: Dockerfile
     container_name: bema-user-service
     restart: unless-stopped
     depends_on:
@@ -88,6 +85,7 @@ services:
       IDENTITY_SERVICE_URL: http://identity-service:8084
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318/v1/traces
     expose:
       - "8081"
     networks:
@@ -104,10 +102,8 @@ services:
   # POLICY SERVICE
   # ─────────────────────────────────────────────────────────────────────────────
   policy-service:
+    image: fra.ocir.io/frurj87kcrxi/bema-policy-service:latest
     logging: *default-logging
-    build:
-      context: ../../bema-policy-service
-      dockerfile: Dockerfile
     container_name: bema-policy-service
     restart: unless-stopped
     depends_on:
@@ -125,6 +121,7 @@ services:
       IDENTITY_SERVICE_URL: http://identity-service:8084
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318/v1/traces
     expose:
       - "8082"
     networks:
@@ -141,10 +138,8 @@ services:
   # CLAIM SERVICE
   # ─────────────────────────────────────────────────────────────────────────────
   claim-service:
+    image: fra.ocir.io/frurj87kcrxi/bema-claim-service:latest
     logging: *default-logging
-    build:
-      context: ../../bema-claim-service
-      dockerfile: Dockerfile
     container_name: bema-claim-service
     restart: unless-stopped
     depends_on:
@@ -183,11 +178,8 @@ services:
   # CLAIM MIGRATIONS (SEPARATE SERVICE)
   # ─────────────────────────────────────────────────────────────────────────────
   claim-migrations:
+    image: fra.ocir.io/frurj87kcrxi/bema-claim-migrations:latest
     logging: *default-logging
-    build:
-      context: ../../bema-claim-service
-      dockerfile: Dockerfile
-      target: migrations
     container_name: bema-claim-migrations
     command: npx prisma migrate deploy
     restart: "no"
@@ -203,10 +195,8 @@ services:
   # IDENTITY SERVICE (FIXED)
   # ─────────────────────────────────────────────────────────────────────────────
   identity-service:
+    image: fra.ocir.io/frurj87kcrxi/bema-identity-service:latest
     logging: *default-logging
-    build:
-      context: ../../identity-service
-      dockerfile: Dockerfile
     container_name: bema-identity-service
     restart: unless-stopped
 
@@ -246,6 +236,7 @@ services:
 
       # SERVICE COMMUNICATION
       USER_SERVICE_URL: http://user-service:8081
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318/v1/traces
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health"]
@@ -259,10 +250,8 @@ services:
   # FRONTEND
   # ─────────────────────────────────────────────────────────────────────────────
   frontend:
+    image: fra.ocir.io/frurj87kcrxi/bema-frontend:latest
     logging: *default-logging
-    build:
-      context: ../../bema-frontend
-      dockerfile: Dockerfile
     container_name: bema-frontend
     restart: unless-stopped
     depends_on:
@@ -285,9 +274,6 @@ services:
 
   postgres-user:
     logging: *default-logging
-    build:
-      context: ./postgres
-      dockerfile: Dockerfile
     image: bema-postgres:17.10-alpine-patched
     command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements", "-c", "log_min_duration_statement=500"]
     container_name: bema-user-db
@@ -308,9 +294,6 @@ services:
 
   postgres-policy:
     logging: *default-logging
-    build:
-      context: ./postgres
-      dockerfile: Dockerfile
     image: bema-postgres:17.10-alpine-patched
     command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements", "-c", "log_min_duration_statement=500"]
     container_name: bema-policy-db
@@ -331,9 +314,6 @@ services:
 
   postgres-claim:
     logging: *default-logging
-    build:
-      context: ./postgres
-      dockerfile: Dockerfile
     image: bema-postgres:17.10-alpine-patched
     command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements", "-c", "log_min_duration_statement=500"]
     container_name: bema-claim-db
@@ -354,9 +334,6 @@ services:
 
   postgres-identity:
     logging: *default-logging
-    build:
-      context: ./postgres
-      dockerfile: Dockerfile
     image: bema-postgres:17.10-alpine-patched
     command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements", "-c", "log_min_duration_statement=500"]
     container_name: bema-identity-db

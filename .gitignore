@@ -207,3 +207,4 @@ test-results/
 
 # Generated database backups
 backups/
+env/.env.oracle
