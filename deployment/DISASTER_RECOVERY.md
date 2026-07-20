@@ -8,7 +8,7 @@ Its objective is to restore production services safely and consistently followin
 
 This document defines the required disaster recovery process.
 
-The concrete production implementation is completed during Phase 6 using the selected AWS platform.
+The concrete production implementation is completed during Phase 6 using the selected production platform.
 
 ---
 
@@ -309,7 +309,7 @@ The production implementation must include:
 * disaster recovery monitoring
 * documented operational runbooks
 
-The specific AWS services and orchestration platform are implemented during Phase 6.
+The specific production services and deployment platform are implemented during Phase 6.
 
 ---
 

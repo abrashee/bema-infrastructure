@@ -27,7 +27,7 @@ Therefore:
 
 ## Production orchestrator requirements
 
-The AWS production platform selected in Phase 6 must support:
+The production platform selected in Phase 6 must support:
 
 - at least two replicas for each user-facing stateless service
 - health-based replacement

@@ -73,7 +73,7 @@ full application startup against restored databases
 business-level row counts and data invariants
 authentication against restored identity data
 full claim-processing workflow
-production AWS backup restoration
+production backup restoration
 
 Those broader disaster-recovery checks are covered by Task 16 and Phase 6 production validation.
 

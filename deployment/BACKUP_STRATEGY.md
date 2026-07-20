@@ -196,7 +196,7 @@ These capabilities are intentionally deferred.
 
 # Phase 6 production implementation
 
-Production deployment must implement automated backups using AWS-managed services.
+Production deployment must implement automated backups using the selected production platform's managed backup capabilities.
 
 The production implementation must include:
 
@@ -208,7 +208,7 @@ The production implementation must include:
 - restore testing
 - recovery documentation
 
-The specific AWS service selection is part of Phase 6.
+The specific production backup implementation is part of Phase 6.
 
 ---
 
