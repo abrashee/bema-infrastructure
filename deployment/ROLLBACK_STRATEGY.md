@@ -173,7 +173,7 @@ A rollback is complete only after verifying:
 
 Docker Compose can recreate a previous local image or configuration, but it does not provide production revision management, traffic shifting, or automatic rollback.
 
-Local Compose rollback testing is limited to integration verification. The concrete automated rollback mechanism must be implemented in Phase 6 using the selected AWS orchestrator.
+Local Compose rollback testing is limited to integration verification. The production rollback mechanism for Bema uses OCI VM deployment with Docker Compose. Rollback must restore the previous approved image references and deployment configuration revision.
 
 ## Phase 5 optimization preservation
 
@@ -192,7 +192,7 @@ Operational diagnostics must use external tooling, existing application endpoint
 
 Review and test this strategy whenever any of the following changes:
 
-- production orchestrator
+- production deployment platform or infrastructure model
 - deployment order
 - database migration tooling
 - image naming or registry strategy
